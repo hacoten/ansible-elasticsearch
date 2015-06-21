@@ -1,0 +1,16 @@
+- name: Install-Elasticsearch-Kibana
+  hosts: es
+  sudo: yes
+  roles:
+    - tools
+    - nginx
+    - elasticsearch
+    - td-agent
+    - kibana
+    - restart
+  vars:
+    hostname: ip-172-31-1-238
+    hostip: 54.64.19.107
+    proxy: false
+    proxy_host: example.com
+    proxy_port: 8080

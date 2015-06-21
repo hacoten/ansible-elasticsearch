@@ -1,0 +1,5 @@
+---
+es_version: 1.3
+es_rpm_key: http://packages.elasticsearch.org/GPG-KEY-elasticsearch
+es_conf: /etc/elasticsearch
+es_port: 9200

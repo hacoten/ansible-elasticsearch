@@ -1,0 +1,18 @@
+---
+- name: install by yum
+  yum: pkg={{ item }} state=installed
+  with_items:
+    - unzip
+
+- name: Create Dir
+  file: path=/var/www/html state=directory
+
+- name: Download kibana
+  get_url: url=http://download.elasticsearch.org/kibana/kibana/kibana-latest.zip dest=/tmp/ force=yes
+
+- name: Extract kibana
+  shell: unzip /tmp/kibana-latest.zip -d /var/www/html/
+
+- name: insert hosts
+  lineinfile: dest=/etc/hosts state=present regexp="{{ hostip }}"
+              insertafter="^::1 " line="{{ ansible_default_ipv4.address }} {{ hostip }}"

@@ -1,0 +1,3 @@
+---
+kibana_dir: /var/www/html/kibana-latest
+#servername: {{ hostname }}

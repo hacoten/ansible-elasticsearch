@@ -1,0 +1,50 @@
+---
+- name: install java
+  yum: pkg={{ item }} state=installed
+  with_items:
+    - java-1.7.0-openjdk
+
+- name: Download and install the Public Signing Key
+  command: rpm --import {{ es_rpm_key }}
+
+- name: Copy elasticsearch.repo
+  template: src=elasticsearch.repo dest=/etc/yum.repos.d/elasticsearch.repo mode=0644
+
+- name: install elasticsearch by yum
+  yum: pkg=elasticsearch state=installed
+
+- name: ensure elasticsearch is running automatically at boot time
+  command: /sbin/chkconfig elasticsearch on
+
+- name: Copy es-config
+  template: src=elasticsearch.yml dest=/etc/elasticsearch/elasticsearch.yml mode=0644
+  notify: restart es
+
+#- name: insert iptables rule
+#  lineinfile: dest=/etc/sysconfig/iptables state=present regexp="{{ es_port }}"
+#              insertafter="^:OUTPUT " line="-A INPUT -p tcp --dport {{ es_port }} -j ACCEPT"
+#  notify: restart iptables
+
+- name: (NotProxy) Add Plugin elasticsearch-head
+  command: /usr/share/elasticsearch/bin/plugin -install mobz/elasticsearch-head
+  args:
+    creates: /usr/share/elasticsearch/plugins/head
+  when: not proxy
+
+- name: (Proxy) Add Plugin elasticsearch-head
+  command: /usr/share/elasticsearch/bin/plugin -DproxyPort={{ proxy_port }} -DproxyHost={{ proxy_host }} -install mobz/elasticsearch-head
+  args:
+    creates: /usr/share/elasticsearch/plugins/head
+  when: proxy
+
+- name: (NotProxy) Add Plugin elasticsearch-bigdesk
+  command: /usr/share/elasticsearch/bin/plugin -install lukas-vlcek/bigdesk
+  args:
+    creates: /usr/share/elasticsearch/plugins/bigdesk
+  when: not proxy
+
+- name: (Proxy) Add Plugin elasticsearch-bigdesk
+  command: /usr/share/elasticsearch/bin/plugin -DproxyPort={{ proxy_port }} -DproxyHost={{ proxy_host }} -install lukas-vlcek/bigdesk
+  args:
+    creates: /usr/share/elasticsearch/plugins/bigdesk
+  when: proxy
